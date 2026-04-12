@@ -10,21 +10,22 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const lib = b.addLibrary(.{
-        .name = "quickjs",
-        .root_module = b.createModule(.{
-            .target = target,
-            .optimize = optimize,
-        }),
-        .linkage = .static,
+    const module = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
     });
 
-    lib.linkLibC();
-
-    lib.addCSourceFiles(.{
+    module.addCSourceFiles(.{
         .root = upstream.path("."),
         .files = source_files,
         .flags = compile_flags,
+    });
+
+    const lib = b.addLibrary(.{
+        .name = "quickjs",
+        .root_module = module,
+        .linkage = .static,
     });
 
     lib.installHeadersDirectory(
